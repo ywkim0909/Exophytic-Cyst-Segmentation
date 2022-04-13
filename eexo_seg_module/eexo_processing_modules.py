@@ -2,7 +2,6 @@ import numpy as np
 from typing import Union, Tuple
 from copy import deepcopy
 
-# from eexo_seg_module.nnUNetTrainer import nnUNetTrainer
 from nnunet.training.network_training.nnUNetTrainer import nnUNetTrainer
 from multiprocessing import Process, Queue
 import SimpleITK as sitk
@@ -20,8 +19,6 @@ def to_one_hot(seg, all_seg_labels=None):
 
 def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files, segs_from_prev_stage, classes,
                              transpose_forward):
-    # suppress output
-    # sys.stdout = open(os.devnull, 'w')
 
     errors_in = []
     for i, l in enumerate(list_of_lists):
@@ -35,7 +32,6 @@ def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files, segs
                                 " must point to a " \
                                 "segmentation file"
                 seg_prev = sitk.GetArrayFromImage(sitk.ReadImage(segs_from_prev_stage[i]))
-                # check to see if shapes match
                 img = sitk.GetArrayFromImage(sitk.ReadImage(l[0]))
                 assert all([i == j for i, j in zip(seg_prev.shape, img.shape)]), "image and segmentation from previous " \
                                                                                  "stage don't have the same pixel array " \
@@ -45,15 +41,8 @@ def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files, segs
                 seg_reshaped = resize_segmentation(seg_prev, d.shape[1:], order=1, cval=0)
                 seg_reshaped = to_one_hot(seg_reshaped, classes)
                 d = np.vstack((d, seg_reshaped)).astype(np.float32)
-            """There is a problem with python process communication that prevents us from communicating obejcts 
-            larger than 2 GB between processes (basically when the length of the pickle string that will be sent is 
-            communicated by the multiprocessing.Pipe object then the placeholder (\%i I think) does not allow for long 
-            enough strings (lol). This could be fixed by changing i to l (for long) but that would require manually 
-            patching system python code. We circumvent that problem here by saving softmax_pred to a npy file that will 
-            then be read (and finally deleted) by the Process. save_segmentation_nifti_from_softmax can take either 
-            filename or np.ndarray and will handle this automatically"""
             print(d.shape)
-            if np.prod(d.shape) > (2e9 / 4 * 0.85):  # *0.85 just to be save, 4 because float32 is 4 bytes
+            if np.prod(d.shape) > (2e9 / 4 * 0.85):
                 print(
                     "This output is too large for python process-process communication. "
                     "Saving output temporarily to disk")
@@ -71,8 +60,6 @@ def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files, segs
         print("These cases were ignored.")
     else:
         print("This worker has ended successfully, no errors to report")
-    # restore output
-    # sys.stdout = sys.__stdout__
 
 
 def preprocess_multithreaded(trainer, list_of_lists, output_files, num_processes=2, segs_from_prev_stage=None):
@@ -107,7 +94,7 @@ def preprocess_multithreaded(trainer, list_of_lists, output_files, num_processes
     finally:
         for p in processes:
             if p.is_alive():
-                p.terminate()  # this should not happen but better safe than sorry right
+                p.terminate()
             p.join()
 
         q.close()
@@ -119,36 +106,6 @@ def save_segmentation_nifti_from_softmax(segmentation_softmax: Union[str, np.nda
                                          resampled_npz_fname: str = None,
                                          non_postprocessed_fname: str = None, force_separate_z: bool = None,
                                          interpolation_order_z: int = 0, verbose: bool = True):
-    """
-    This is a utility for writing segmentations to nifto and npz. It requires the data to have been preprocessed by
-    GenericPreprocessor because it depends on the property dictionary output (dct) to know the geometry of the original
-    data. segmentation_softmax does not have to have the same size in pixels as the original data, it will be
-    resampled to match that. This is generally useful because the spacings our networks operate on are most of the time
-    not the native spacings of the image data.
-    If seg_postprogess_fn is not None then seg_postprogess_fnseg_postprogess_fn(segmentation, *seg_postprocess_args)
-    will be called before nifto export
-    There is a problem with python process communication that prevents us from communicating obejcts
-    larger than 2 GB between processes (basically when the length of the pickle string that will be sent is
-    communicated by the multiprocessing.Pipe object then the placeholder (\%i I think) does not allow for long
-    enough strings (lol). This could be fixed by changing i to l (for long) but that would require manually
-    patching system python code.) We circumvent that problem here by saving softmax_pred to a npy file that will
-    then be read (and finally deleted) by the Process. save_segmentation_nifti_from_softmax can take either
-    filename or np.ndarray for segmentation_softmax and will handle this automatically
-    :param segmentation_softmax:
-    :param out_fname:
-    :param properties_dict:
-    :param order:
-    :param region_class_order:
-    :param seg_postprogess_fn:
-    :param seg_postprocess_args:
-    :param resampled_npz_fname:
-    :param non_postprocessed_fname:
-    :param force_separate_z: if None then we dynamically decide how to resample along z, if True/False then always
-    /never resample along z separately. Do not touch unless you know what you are doing
-    :param interpolation_order_z: if separate z resampling is done then this is the order for resampling in z
-    :param verbose:
-    :return:
-    """
     if verbose: print("force_separate_z:", force_separate_z, "interpolation order:", order)
 
     if isinstance(segmentation_softmax, str):
@@ -184,7 +141,6 @@ def save_segmentation_nifti_from_softmax(segmentation_softmax: Union[str, np.nda
         seg_old_spacing = resample_data_or_seg(segmentation_softmax, shape_original_after_cropping, is_seg=False,
                                                axis=lowres_axis, order=order, do_separate_z=do_separate_z, cval=0,
                                                order_z=interpolation_order_z)
-        # seg_old_spacing = resize_softmax_output(segmentation_softmax, shape_original_after_cropping, order=order)
     else:
         if verbose: print("no resampling necessary")
         seg_old_spacing = segmentation_softmax

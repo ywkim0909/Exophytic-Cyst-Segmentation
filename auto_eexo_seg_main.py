@@ -4,17 +4,13 @@ from multiprocessing import Pool
 
 import torch
 from batchgenerators.utilities.file_and_folder_operations import *
-
 from eexo_seg_module.eexo_load_model import load_model_and_checkpoint_files
 from eexo_seg_module.eexo_processing_modules import preprocess_multithreaded, save_segmentation_nifti_from_softmax
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", '--input_folder', help="Must contain all modalities for each patient in the correct"
-                                                     " order (same as training). Files must be named "
-                                                     "CASENAME_XXXX.nii.gz where XXXX is the modality "
-                                                     "identifier (0000, 0001, etc)", default="images_test", required=False)
-    parser.add_argument('-o', "--output_folder", default="eexo_seg_results_raw", required=False, help="folder for saving predictions")
+    parser.add_argument("-i", '--input_folder', help="Input folder name containing NIfTI(nii.gz) files", default="images_test", required=False)
+    parser.add_argument('-o', "--output_folder", help="Folder name for saving predictions", default="eexo_seg_results_raw", required=False)
 
     args = parser.parse_args()
     model = "3d_fullres"
@@ -98,12 +94,9 @@ if __name__ == "__main__":
             region_class_order = trainer.regions_class_order
         else:
             region_class_order = None
+
         bytes_per_voxel = 4
-        if all_in_gpu:
-            bytes_per_voxel = 2  # if all_in_gpu then the return value is half (float16)
-        if np.prod(softmax_mean.shape) > (2e9 / bytes_per_voxel * 0.85):  # * 0.85 just to be save
-            print(
-                "This output is too large for python process-process communication. Saving output temporarily to disk")
+        if np.prod(softmax_mean.shape) > (2e9 / bytes_per_voxel * 0.85):
             np.save(output_filename[:-7] + ".npy", softmax_mean)
             softmax_mean = output_filename[:-7] + ".npy"
 
