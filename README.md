@@ -29,7 +29,8 @@ Plotting mask overlayed images module loads the original MR images and mask file
     plot_maskoverlay_images_main.py -i [input_folder] -l [label_folder] -o [output_folder]
 
 Specifying input, label and output folders is also optional, so you can just put `plot_maskoverlay_images_main.py` if you want to plot the images with the default files. The examples of saved images are illustrated below:
-**Label overlayed images (case without exophytic cysts)**
+
+### (Example 1) Label overlayed images (case without exophytic cysts)
 ![case_without_exophytic_cysts](./eexo_seg_mask_overlay/ADPKDEEXO_002_111188.png)
-**Label overlayed images (case with exophytic cysts)**
+### (Example 2) Label overlayed images (case with exophytic cysts)
 ![case_with_exophytic_cysts](./eexo_seg_mask_overlay/ADPKDEEXO_005_111163.png)
