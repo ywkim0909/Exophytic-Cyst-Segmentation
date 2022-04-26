@@ -22,17 +22,18 @@ Note that PyTorch with GPU (a few seconds/case) performs much faster than PyTorc
 
 ExoCystSegNet was tested on PyTorch versions from 1.7 to 1.11 (latest version as of Apr 25, 2022).
 ## PyTorch (GPU)
-You can ignore this step if you already have PyTorch with CUDA available.
+You can ignore this step if you already have PyTorch with CUDA available (version >= 1.7).
 
     >> conda create -n [virtual_env_name] python=3.8.5
     >> conda activate [virtual_env_name]
     >> conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=[your_CUDA_version] -c pytorch -c conda-forge
 ## PyTorch (CPU)
+You can ignore this step if you already have PyTorch with CPU (version >= 1.7).
 
 
     >> conda create -n [virtual_env_name] python=3.8.5
     >> conda activate [virtual_env_name]
-    >> conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=[your_CUDA_version] -c pytorch -c conda-forge
+    >> conda install pytorch torchvision torchaudio cpuonly -c pytorch
 ## Download ExoCystSegNet & Install nnU-Net
     >> git clone https://github.com/ywkim0909/Exophytic-Cyst-Segmentation
     >> cd Exophytic-Cyst-Segmentation
