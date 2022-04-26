@@ -13,13 +13,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     model = "3d_fullres"
-    # num_threads_preprocessing = 6
-    # num_threads_nifti_save = 2
-    folds = None
-    num_parts = 1
     do_tta = True
     mixed_precision = True
-    mode = 'normal'
     all_in_gpu = None
     step_size = 0.5
     force_separate_z = None
@@ -59,8 +54,6 @@ if __name__ == "__main__":
 
     print("starting preprocessing generator")
 
-    # preprocessing = preprocess_multithreaded(trainer, list_of_lists, cleaned_output_files, num_threads_preprocessing)
-    # print(dir(preprocessing))
     print("starting prediction...")
     all_output_files = []
     for i, l in enumerate(list_of_lists):
@@ -101,12 +94,6 @@ if __name__ == "__main__":
             softmax_mean = output_filename[:-7] + ".npy"
 
         results.append(save_segmentation_nifti_from_softmax(softmax_mean, output_filename, dct, interpolation_order, region_class_order, None, None, None, None, force_separate_z, interpolation_order_z))
-
-        # results.append(pool.starmap_async(save_segmentation_nifti_from_softmax,
-        #                                   ((softmax_mean, output_filename, dct, interpolation_order, region_class_order,
-        #                                     None, None,
-        #                                     None, None, force_separate_z, interpolation_order_z),)
-        #                                   ))
 
     print("inference done. Finish Prediction!")
 

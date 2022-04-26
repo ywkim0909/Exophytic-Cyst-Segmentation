@@ -2,96 +2,10 @@ import numpy as np
 from typing import Union, Tuple
 from copy import deepcopy
 
-# from nnunet.training.network_training.nnUNetTrainer import nnUNetTrainer
-from eexo_seg_module.nnUNetTrainer import nnUNetTrainer
 from multiprocessing import Process, Queue
 import SimpleITK as sitk
 from eexo_seg_module.preprocessing import get_lowres_axis, get_do_separate_z, resample_data_or_seg
 from batchgenerators.utilities.file_and_folder_operations import *
-from batchgenerators.augmentations.utils import resize_segmentation
-
-def to_one_hot(seg, all_seg_labels=None):
-    if all_seg_labels is None:
-        all_seg_labels = np.unique(seg)
-    result = np.zeros((len(all_seg_labels), *seg.shape), dtype=seg.dtype)
-    for i, l in enumerate(all_seg_labels):
-        result[i][seg == l] = 1
-    return result
-
-def preprocess_save_to_queue(preprocess_fn, q, list_of_lists, output_files, segs_from_prev_stage, classes,
-                             transpose_forward):
-
-    errors_in = []
-    for i, l in enumerate(list_of_lists):
-        print('i and l: {}, {}'.format(i, l))
-        try:
-            output_file = output_files[i]
-            print('output_files: {}'.format(output_file))
-            print("preprocessing", output_file)
-            d, _, dct = preprocess_fn(l)
-            print(d.shape)
-            if np.prod(d.shape) > (2e9 / 4 * 0.85):
-                print(
-                    "This output is too large for python process-process communication. "
-                    "Saving output temporarily to disk")
-                np.save(output_file[:-7] + ".npy", d)
-                d = output_file[:-7] + ".npy"
-            q.put((output_file, (d, dct)))
-        except KeyboardInterrupt:
-            raise KeyboardInterrupt
-        except Exception as e:
-            print("error in", l)
-            print(e)
-    q.put("end")
-    if len(errors_in) > 0:
-        print("There were some errors in the following cases:", errors_in)
-        print("These cases were ignored.")
-    else:
-        print("This worker has ended successfully, no errors to report")
-
-
-def preprocess_multithreaded(trainer, list_of_lists, output_files, num_processes=2, segs_from_prev_stage=None):
-    if segs_from_prev_stage is None:
-        segs_from_prev_stage = [None] * len(list_of_lists)
-
-    num_processes = min(len(list_of_lists), num_processes)
-
-    classes = list(range(1, trainer.num_classes))
-    # assert isinstance(trainer, nnUNetTrainer)
-    q = Queue(1)
-    processes = []
-    #
-    # for i, l in enumerate(list_of_lists):
-    #     prtrainer.preprocess_patient(l)
-
-
-
-    for i in range(num_processes):
-        pr = Process(target=preprocess_save_to_queue, args=(trainer.preprocess_patient, q,
-                                                            list_of_lists[i::num_processes],
-                                                            output_files[i::num_processes],
-                                                            segs_from_prev_stage[i::num_processes],
-                                                            classes, trainer.plans['transpose_forward']))
-        pr.start()
-        processes.append(pr)
-
-    try:
-        end_ctr = 0
-        while end_ctr != num_processes:
-            item = q.get()
-            if item == "end":
-                end_ctr += 1
-                continue
-            else:
-                yield item
-
-    finally:
-        for p in processes:
-            if p.is_alive():
-                p.terminate()
-            p.join()
-
-        q.close()
 
 def save_segmentation_nifti_from_softmax(segmentation_softmax: Union[str, np.ndarray], out_fname: str,
                                          properties_dict: dict, order: int = 1,

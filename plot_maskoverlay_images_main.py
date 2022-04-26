@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import SimpleITK as sitk
 from pathlib import Path
-from skimage import color
 from pylab import *
 
 if __name__ == "__main__":
