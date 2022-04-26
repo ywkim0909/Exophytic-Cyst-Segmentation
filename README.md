@@ -18,7 +18,7 @@ ExoCystSegNet can be installed and run on Linux, Windows, and macOS. Following a
 * macOS
 	* macOS Monterey 12.3.1 (CPU only)
 
-Note that PyTorch with GPU (a few seconds/case) performs much faster than PyTorch with CPU (~10 minutes/case). **To use GPU version of PyTorch, it is important to install PyTorch with <U>*appropriate CUDA version*</U> for your workstation!** Otherwise, you need to install PyTorch with CPU only version. We recommend to use virtual environment (e.g., [Anaconda](https://anaconda.org)).
+Note that PyTorch with GPU (a few seconds/case) performs much faster than PyTorch with CPU (~10 minutes/case). **To use GPU version of PyTorch, it is important to install PyTorch with <U>*an appropriate CUDA version*</U> for your workstation!** Otherwise, you need to install PyTorch with CPU only version. We recommend to use virtual environment (e.g., [Anaconda](https://anaconda.org)).
 
 ExoCystSegNet was tested on PyTorch versions from 1.7 to 1.11 (latest version as of Apr 25, 2022).
 ## PyTorch (GPU)
