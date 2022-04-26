@@ -1,0 +1,14 @@
+tqdm
+dicom2nifti
+scikit-image>=0.14
+medpy
+scipy
+batchgenerators==0.21
+numpy
+sklearn
+SimpleITK
+pandas
+requests
+nibabel
+tifffile
+matplotlib
