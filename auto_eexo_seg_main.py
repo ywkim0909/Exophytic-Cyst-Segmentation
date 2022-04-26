@@ -1,11 +1,10 @@
 import argparse
 import numpy as np
-from multiprocessing import Pool
 
 import torch
 from batchgenerators.utilities.file_and_folder_operations import *
 from eexo_seg_module.eexo_load_model import load_model_and_checkpoint_files
-from eexo_seg_module.eexo_processing_modules import preprocess_multithreaded, save_segmentation_nifti_from_softmax
+from eexo_seg_module.eexo_processing_modules import save_segmentation_nifti_from_softmax
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -14,8 +13,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     model = "3d_fullres"
-    num_threads_preprocessing = 6
-    num_threads_nifti_save = 2
+    # num_threads_preprocessing = 6
+    # num_threads_nifti_save = 2
     folds = None
     num_parts = 1
     do_tta = True
@@ -55,18 +54,19 @@ if __name__ == "__main__":
             f = f + ".nii.gz"
         cleaned_output_files.append(join(dr, f))
 
-    pool = Pool(num_threads_nifti_save)
-
     torch.cuda.empty_cache()
     trainer, params = load_model_and_checkpoint_files(model, model_info_path, model_file_path)
 
     print("starting preprocessing generator")
 
-    preprocessing = preprocess_multithreaded(trainer, list_of_lists, cleaned_output_files, num_threads_preprocessing)
+    # preprocessing = preprocess_multithreaded(trainer, list_of_lists, cleaned_output_files, num_threads_preprocessing)
+    # print(dir(preprocessing))
     print("starting prediction...")
     all_output_files = []
-    for preprocessed in preprocessing:
-        output_filename, (d, dct) = preprocessed
+    for i, l in enumerate(list_of_lists):
+        print("i and l: {} and {}".format(i, l))
+        d, _, dct = trainer.preprocess_patient(l)
+        output_filename = cleaned_output_files[i]
         all_output_files.append(all_output_files)
         if isinstance(d, str):
             data = np.load(d)
@@ -100,16 +100,15 @@ if __name__ == "__main__":
             np.save(output_filename[:-7] + ".npy", softmax_mean)
             softmax_mean = output_filename[:-7] + ".npy"
 
-        results.append(pool.starmap_async(save_segmentation_nifti_from_softmax,
-                                          ((softmax_mean, output_filename, dct, interpolation_order, region_class_order,
-                                            None, None,
-                                            None, None, force_separate_z, interpolation_order_z),)
-                                          ))
+        results.append(save_segmentation_nifti_from_softmax(softmax_mean, output_filename, dct, interpolation_order, region_class_order, None, None, None, None, force_separate_z, interpolation_order_z))
+
+        # results.append(pool.starmap_async(save_segmentation_nifti_from_softmax,
+        #                                   ((softmax_mean, output_filename, dct, interpolation_order, region_class_order,
+        #                                     None, None,
+        #                                     None, None, force_separate_z, interpolation_order_z),)
+        #                                   ))
 
     print("inference done. Finish Prediction!")
-
-    pool.close()
-    pool.join()
 
 
 
