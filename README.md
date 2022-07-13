@@ -5,7 +5,14 @@ This software package (ExoCystSegNet) includes the source codes for a fully auto
     Bae, K. T., Shi, T., Tao, C., et al. (2020). Expanded Imaging Classification of Autosomal Dominant 
     Polycystic Kidney Disease. Journal of the American Society of Nephrology, 31(7), 1640-1651.
 
-ExoCystSegNet was trained and tested using *T<sub>2*-weighted MR images. The paper illustrating training procedure and details of training and testing datasets was submitted to the journal, and it will be updated once the paper is published.
+ExoCystSegNet was trained and tested using *T<sub>2*-weighted MR images. The paper illustrating training procedure and details of training and testing datasets will be published in *Journal of the American Society of Nephrology (JASN)*. For more information, please read the [following paper](https://doi.org/10.1681/ASN.2021111400):
+
+    Kim, Y., Tao, C., Kim, H., Oh, G. Y., Ko, J., Bae, K. T. (2022). A Deep Learning Approach for Automated Segmentation 
+    of Kidneys and Exophytic Cysts in Individuals with Autosomal Dominant Polycystic Kidney Disease. 
+    Journal of the American Society of Nephrology, 33(8).
+
+E
+
 
 # Installation
 ## Dependencies
