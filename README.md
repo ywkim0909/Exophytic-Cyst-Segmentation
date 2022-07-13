@@ -11,9 +11,6 @@ ExoCystSegNet was trained and tested using *T<sub>2*-weighted MR images. The pap
     of Kidneys and Exophytic Cysts in Individuals with Autosomal Dominant Polycystic Kidney Disease. 
     Journal of the American Society of Nephrology, 33(8).
 
-E
-
-
 # Installation
 ## Dependencies
 ExoCystSegNet can be installed and run on Linux, Windows, and macOS. Following are the list of operating systems on which ExoCystSegNet was tested. 
